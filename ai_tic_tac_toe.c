@@ -33,16 +33,16 @@ int isSafe(int vertex, int c) {
     return 1;
 }
 
-int graphColoring(int v, int V, int M) {
-    if (v == V)
+int graphColoring(int i, int V, int M) {
+    if (i == V)
         return 1;
 
     for (int c = 1; c <= M; c++) {
-        if (isSafe(v, c)) {
-            colors[v] = c;
-            if (graphColoring(v + 1, V, M))
+        if (isSafe(i, c)) {
+            colors[i] = c;
+            if (graphColoring(i + 1, V, M))
                 return 1;
-            colors[v] = 0;
+            colors[i] = 0;
         }
     }
     return 0;
