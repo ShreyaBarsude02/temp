@@ -52,7 +52,7 @@ int minimax(int depth, int isMax) {
                 if (board[i][j] != 'X' && board[i][j] != 'O') {
                     char temp = board[i][j];
                     board[i][j] = ai;
-                    best = (minimax(depth + 1, 0) > best) ? minimax(depth + 1, 0) : best;
+                    best = max(best, minimax(depth + 1, 0));
                     board[i][j] = temp;
                 }
         return best;
@@ -63,7 +63,7 @@ int minimax(int depth, int isMax) {
                 if (board[i][j] != 'X' && board[i][j] != 'O') {
                     char temp = board[i][j];
                     board[i][j] = player;
-                    best = (minimax(depth + 1, 1) < best) ? minimax(depth + 1, 1) : best;
+                    best = min(best, minimax(depth + 1, 1));
                     board[i][j] = temp;
                 }
         return best;
