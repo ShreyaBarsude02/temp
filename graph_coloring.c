@@ -1,57 +1,77 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
 
-#define V 4
+#define MAX_V 100
 
-int graph[V][V] = {
-    {0, 1, 1, 1},
-    {1, 0, 1, 0},
-    {1, 1, 0, 1},
-    {1, 0, 1, 0}
-};
+typedef struct Node {
+    int vertex;
+    struct Node* next;
+} Node;
 
-bool isSafe(int v, int color[], int c) {
-    for (int i = 0; i < V; i++) {
-        if (graph[v][i] == 1 && color[i] == c)
-            return false;
-    }
-    return true;
+Node* adjList[MAX_V];
+int colors[MAX_V];
+
+void addEdge(int u, int v) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->vertex = v;
+    newNode->next = adjList[u];
+    adjList[u] = newNode;
+
+    newNode = (Node*)malloc(sizeof(Node));
+    newNode->vertex = u;
+    newNode->next = adjList[v];
+    adjList[v] = newNode;
 }
 
-bool graphColoringUtil(int m, int color[], int v) {
-    if (v == V)
-        return true;
+int isSafe(int vertex, int c) {
+    Node* temp = adjList[vertex];
+    while (temp != NULL) {
+        if (colors[temp->vertex] == c)
+            return 0;
+        temp = temp->next;
+    }
+    return 1;
+}
 
-    for (int c = 1; c <= m; c++) {
-        if (isSafe(v, color, c)) {
-            color[v] = c;
-            if (graphColoringUtil(m, color, v + 1))
-                return true;
-            color[v] = 0;
+int graphColoring(int v, int V, int M) {
+    if (v == V)
+        return 1;
+
+    for (int c = 1; c <= M; c++) {
+        if (isSafe(v, c)) {
+            colors[v] = c;
+            if (graphColoring(v + 1, V, M))
+                return 1;
+            colors[v] = 0;
         }
     }
-    return false;
+    return 0;
 }
 
-bool graphColoring(int m) {
-    int color[V];
+void printColors(int V) {
     for (int i = 0; i < V; i++)
-        color[i] = 0;
-
-    if (graphColoringUtil(m, color, 0) == false) {
-        printf("Solution does not exist\n");
-        return false;
-    }
-
-    char* colors[] = {"Red", "Green", "Pink", "Blue"};
-    for (int i = 0; i < V; i++) {
-        printf("Vertex %d -> %s\n", i, colors[color[i] - 1]);
-    }
-    return true;
+        printf("Vertex %d ---> Color %d\n", i, colors[i]);
 }
 
 int main() {
-    int m = 4;
-    graphColoring(m);
+    int V = 4;
+    int M = 3;
+
+    for (int i = 0; i < V; i++) {
+        adjList[i] = NULL;
+        colors[i] = 0;
+    }
+
+    addEdge(0, 1);
+    addEdge(0, 2);
+    addEdge(1, 2);
+    addEdge(1, 3);
+    addEdge(2, 3);
+
+    if (graphColoring(0, V, M))
+        printColors(V);
+    else
+        printf("Solution does not exist.\n");
+
     return 0;
 }

@@ -1,142 +1,77 @@
 #include <stdio.h>
-#include <limits.h>
+#include <stdlib.h>
 
-char board[3][3] = {
-    {'1','2','3'},
-    {'4','5','6'},
-    {'7','8','9'}
-};
+#define MAX_V 100
 
-char player = 'X';
-char ai = 'O';
+typedef struct Node {
+    int vertex;
+    struct Node* next;
+} Node;
 
-void drawBoard() {
-    printf("\n");
-    for (int i = 0; i < 3; i++) {
-        printf(" ");
-        for (int j = 0; j < 3; j++) {
-            printf("%c", board[i][j]);
-        }
-         printf("\n");
-    }
-    printf("\n\n");
+Node* adjList[MAX_V];
+int colors[MAX_V];
+
+void addEdge(int u, int v) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->vertex = v;
+    newNode->next = adjList[u];
+    adjList[u] = newNode;
+
+    newNode = (Node*)malloc(sizeof(Node));
+    newNode->vertex = u;
+    newNode->next = adjList[v];
+    adjList[v] = newNode;
 }
 
-int checkWinner(char mark) {
-    for (int i = 0; i < 3; i++) {
-        if (board[i][0]==mark && board[i][1]==mark && board[i][2]==mark) return 1;
-        if (board[0][i]==mark && board[1][i]==mark && board[2][i]==mark) return 1;
+int isSafe(int vertex, int c) {
+    Node* temp = adjList[vertex];
+    while (temp != NULL) {
+        if (colors[temp->vertex] == c)
+            return 0;
+        temp = temp->next;
     }
-    if (board[0][0]==mark && board[1][1]==mark && board[2][2]==mark) return 1;
-    if (board[0][2]==mark && board[1][1]==mark && board[2][0]==mark) return 1;
-    return 0;
+    return 1;
 }
 
-int isMovesLeft() {
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (board[i][j] != 'X' && board[i][j] != 'O')
+int graphColoring(int v, int V, int M) {
+    if (v == V)
+        return 1;
+
+    for (int c = 1; c <= M; c++) {
+        if (isSafe(v, c)) {
+            colors[v] = c;
+            if (graphColoring(v + 1, V, M))
                 return 1;
+            colors[v] = 0;
+        }
+    }
     return 0;
 }
 
-int minimax(int depth, int isMax) {
-    if (checkWinner(ai)) return 10 - depth;
-    if (checkWinner(player)) return depth - 10;
-    if (!isMovesLeft()) return 0;
-
-    if (isMax) {
-        int best = INT_MIN;
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-                if (board[i][j] != 'X' && board[i][j] != 'O') {
-                    char temp = board[i][j];
-                    board[i][j] = ai;
-                    best = max(best, minimax(depth + 1, 0));
-                    board[i][j] = temp;
-                }
-        return best;
-    } else {
-        int best = INT_MAX;
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-                if (board[i][j] != 'X' && board[i][j] != 'O') {
-                    char temp = board[i][j];
-                    board[i][j] = player;
-                    best = min(best, minimax(depth + 1, 1));
-                    board[i][j] = temp;
-                }
-        return best;
-    }
-}
-
-// AI move
-void bestMove() {
-    int bestVal = INT_MIN;
-    int moveRow = -1, moveCol = -1;
-
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (board[i][j] != 'X' && board[i][j] != 'O') {
-                char temp = board[i][j];
-                board[i][j] = ai;
-                int moveVal = minimax(0, 0);
-                board[i][j] = temp;
-
-                if (moveVal > bestVal) {
-                    moveRow = i;
-                    moveCol = j;
-                    bestVal = moveVal;
-                }
-            }
-
-    board[moveRow][moveCol] = ai;
-    printf("AI placed 'O' at position %d\n", (moveRow * 3 + moveCol + 1));
-}
-
-// Player move
-void playerMove() {
-    int move;
-    printf("Enter your move (1-9): ");
-    scanf("%d", &move);
-
-    int row = (move - 1) / 3;
-    int col = (move - 1) % 3;
-
-    if (move < 1 || move > 9 || board[row][col] == 'X' || board[row][col] == 'O') {
-        printf("Invalid move! Try again.\n");
-        playerMove();
-    } else {
-        board[row][col] = player;
-    }
+void printColors(int V) {
+    for (int i = 0; i < V; i++)
+        printf("Vertex %d ---> Color %d\n", i, colors[i]);
 }
 
 int main() {
-    drawBoard();
+    int V = 4;
+    int M = 3;
 
-    while (1) {
-        playerMove();
-        drawBoard();
-        if (checkWinner(player)) {
-            printf("You win!\n");
-            break;
-        }
-        if (!isMovesLeft()) {
-            printf("It's a draw!\n");
-            break;
-        }
-
-        bestMove();
-        drawBoard();
-        if (checkWinner(ai)) {
-            printf("AI wins!\n");
-            break;
-        }
-        if (!isMovesLeft()) {
-            printf("It's a draw!\n");
-            break;
-        }
+    for (int i = 0; i < V; i++) {
+        adjList[i] = NULL;
+        colors[i] = 0;
     }
+
+    addEdge(0, 1);
+    addEdge(0, 2);
+    addEdge(1, 2);
+    addEdge(1, 3);
+    addEdge(2, 3);
+
+    if (graphColoring(0, V, M))
+        printColors(V);
+    else
+        printf("Solution does not exist.\n");
 
     return 0;
 }
