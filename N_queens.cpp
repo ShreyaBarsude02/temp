@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cstdlib> // for abs()
 
-#define N 8 
+using namespace std;
 
+const int N = 8;
 int board[N];
 
 int isSafe(int row, int col) {
@@ -15,13 +16,16 @@ int isSafe(int row, int col) {
 
 int solve(int row) {
     if (row == N) {
-
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++)
-                printf(j == board[i] ? "Q " : ". ");
-            printf("\n");
+            for (int j = 0; j < N; j++) {
+                if (j == board[i])
+                    cout << "Q ";
+                else
+                    cout << ". ";
+            }
+            cout << "\n";
         }
-        printf("\n");
+        cout << "\n";
         return 1;
     }
 
@@ -37,6 +41,6 @@ int solve(int row) {
 
 int main() {
     if (!solve(0))
-        printf("No solution exists.\n");
+        cout << "No solution exists.\n";
     return 0;
 }
