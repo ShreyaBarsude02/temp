@@ -40,7 +40,7 @@ int AOStar(Node* node) {
         return node->heuristic;
     }
 
-    int minCost = numeric_limits<int>::max();
+    int minCost = INT_MAX;
     ChildSet* bestSet = NULL;
 
     for (int i = 0; i < (int)node->childrenSets.size(); i++) {
